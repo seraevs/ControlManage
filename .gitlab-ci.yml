@@ -1,0 +1,29 @@
+#######################################################
+sonarqube-check:
+  image: mcr.microsoft.com/dotnet/core/sdk:latest
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script: 
+      - "echo 'ubuntu' | sudo -S apt-get update"
+      - "echo 'ubuntu' | sudo -S apt-get -y autoremove"    
+      - "echo 'ubuntu' | sudo -S apt-get -y install --yes openjdk-11-jre"
+      - "echo 'ubuntu' | sudo -S wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb"
+      - "echo 'ubuntu' | sudo -S dpkg -i packages-microsoft-prod.deb"
+      - "echo 'ubuntu' | sudo -S rm packages-microsoft-prod.deb"
+      - "echo 'ubuntu' | sudo -S apt-get -y install -y apt-transport-https && echo 'ubuntu' | sudo -S apt-get -y update && echo 'ubuntu' | sudo -S apt-get -y install -y dotnet-sdk-5.0" 
+      - "echo 'ubuntu' | sudo -S apt-get -y install -y apt-transport-https && echo 'ubuntu' | sudo -S sudo apt-get -y update && echo 'ubuntu' | sudo -S apt-get -y install -y aspnetcore-runtime-5.0"    
+ #     - "dotnet tool install --global dotnet-sonarscanner"
+ #     - "echo 'ubuntu' | sudo -S cp -r /root/.dotnet $HOME/"
+      - "export PATH=\"$PATH:$HOME/.dotnet/tools\""
+      - "dotnet sonarscanner begin /k:\"root_controllmanagement_AXy62INhi6c7Qjs8kPkA\" /d:sonar.login=\"$SONAR_TOKEN\" /d:\"sonar.host.url=$SONAR_HOST_URL\" "
+      - "echo 'ubuntu' | sudo -S dotnet build /var/lib/gitlab-runner/ControllManagement/ControllManagement/ControllManagement.sln"
+      - "dotnet sonarscanner end /d:sonar.login=\"$SONAR_TOKEN\""
+  allow_failure: true
+  only:
+    - master # or the name of your main branch
+#######################################################
