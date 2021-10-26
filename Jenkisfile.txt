@@ -1,0 +1,17 @@
+node('win-10')
+{
+	stage 'Checkout'
+		checkout scm
+
+	stage 'Build'
+        bat 'if exist "C:\\jenkins\\workspace\\MultiScan-1" rd /q /s C:\\jenkins\\workspace\\MultiScan-1'
+	    bat 'if not exist "C:\\jenkins\\workspace\\MultiScan-1" mkdir C:\\jenkins\\workspace\\MultiScan-1'
+	    bat 'git -C C:\\jenkins\\workspace\\MultiScan-1 clone http://192.168.11.189/root/multiscan.git'
+		bat 'C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\MSBuild.exe C:\\jenkins\\workspace\\MultiScan-1\\multiscan\\MultiScan-1\\MultiScan-1.sln'
+
+	stage 'Archive'
+	    bat 'if exist "C:\\jenkins\\workspace\\archive" rd /q /s C:\\jenkins\\workspace\\archive'
+	    bat 'if not exist "C:\\jenkins\\workspace\\archive" mkdir C:\\jenkins\\workspace\\archive'
+	    bat 'xcopy C:\\jenkins\\workspace\\MultiScan-1 C:\\jenkins\\workspace\\archive /s /e' 
+
+}

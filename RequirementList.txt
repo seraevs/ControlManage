@@ -1,0 +1,11 @@
+1) Who install and configure Git Lab and where placed?
+2) Who Who install Git on personal computer of personals?
+3) How many peoples work in R&D commands, how many groups exists?
+4) How many peoples work in IT commands?
+5) Who is in charge describe me my posytion job and my responsibylity?
+6) Who to contact in case of problems?
+7) How work R&D commands today?
+8) How many environment R&D commands exists today?
+9) How many system exists today and what OS they works (Linux, Windows) architectura processors (arm64, X86\64)
+10) Where placed artyfactiory for build versions, who is responsible for version control of R&D commands? 
+11) With Pipeline instruments work R&D commands today.

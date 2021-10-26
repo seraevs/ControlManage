@@ -1,0 +1,527 @@
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '4e5560e2-5c3b-4f14-8e28-0119d86e55fa'
+  imageRepository: 'seraevsmavenhelloworld'
+  containerRegistry: 'seradocker.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/my-app/Dockerfile'
+  tag: '$(Build.BuildId)'
+  
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+    - task: Maven@3
+      inputs:
+        mavenPomFile: 'my-app/pom.xml'
+        mavenOptions: '-Xmx3072m'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.8'
+        jdkArchitectureOption: 'x64'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        goals: 'package'
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+    - task: CopyFiles@2
+      inputs:
+        targetFolder: '$(Build.ArtifactStagingDirectory)'    
+
+    - task: PublishBuildArtifacts@1    
+      displayName: 'Publish Artifact: drop'
+      inputs:
+        PathtoPublish: '$(build.artifactstagingdirectory)'
+		
+		
+		
+		
+		
+		
+		
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+		
+		
+		Basics
+Registry name
+serakuz888
+Subscription
+Azure subscription 1
+Resource Group
+VisualStudioOnline-34E619E56EC3434B9766F01E4789D6F4
+Location
+West Europe
+Availability zones
+Disabled
+SKU
+Standard
+Networking
+Allow public network access
+Yes
+Encryption
+Customer-Managed Key
+Disabled
+Identity
+None
+Key Vault
+None
+Encryption key
+None
+Version
+None
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+## for dockerRegistryServiceConnection go to:
+project settings-->sevvice connections-->pick:sevvice connections name-->Edit-->details= Service connection name == serakuz888_container
+
+## on the portal portal.azure.com after build first pipeline
+ go to: repositories-->pick repositories: the command on your linux machine: docker pull serakuz888.azurecr.io/serakuz888:41
+
+## on the linux machine enter command: 
+
+docker login serakuz888.azurecr.io
+
+user: serakuz888
+
+password pick from: Access Keys--> (user name and password) insert into command line on your linux machine
+
+
+https://portal.azure.com/#blade/HubsExtension/DeploymentDetailsBlade/overview/id/%2Fsubscriptions%2F6d9f2fec-29d0-4963-8cbb-31d85caa8181%2FresourceGroups%2FVisualStudioOnline-34E619E56EC3434B9766F01E4789D6F4%2Fproviders%2FMicrosoft.Resources%2Fdeployments%2FMicrosoft.ContainerRegistry/packageId/Microsoft.ContainerRegistry/packageIconUri/https%3A%2F%2Fcatalogartifact.azureedge.net%2Fpublicartifacts%2FMicrosoft.ContainerRegistry-1.7.0%2FMedium.png/primaryResourceId/%2Fsubscriptions%2F6d9f2fec-29d0-4963-8cbb-31d85caa8181%2Fresourcegroups%2FVisualStudioOnline-34E619E56EC3434B9766F01E4789D6F4%2Fproviders%2FMicrosoft.ContainerRegistry%2Fregistries%2Fserakuz888/createBlade/%7B%22bladeName%22%3A%22CreateBladeV2%22%2C%22extension%22%3A%22Microsoft_Azure_ContainerRegistries%22%7D
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+apache Maven — фреймворк для автоматизации сборки проектов на основе описания их структуры в файлах на языке POM (англ. Project Object Model), являющемся подмножеством XML[4]. Проект Maven издаётся сообществом Apache Software Foundation, где формально является частью Jakarta Project.
+
+Название системы является словом из языка идиш, смысл которого можно примерно выразить как «собиратель знания»[5].
+
+Maven обеспечивает декларативную, а не императивную (в отличие от средства автоматизации сборки Apache Ant) сборку проекта. В файлах описания проекта содержится его спецификация, а не отдельные команды выполнения. Все задачи по обработке файлов, описанные в спецификации, Maven выполняет посредством их обработки последовательностью встроенных и внешних плагинов.
+
+Maven используется для построения и управления проектами, написанными на Java, C#, Ruby, Scala, и других языках[6].
+
+Мне дали проект maven для компиляции и установки на сервере Tomcat. Я никогда не использовал Maven до сегодняшнего дня, но я немного гуглил. Похоже, что для pom.xmlфайлов верхнего уровня в этом проекте установлен тип упаковки pom.
+
+Что я должен делать после mvn installразвертывания этого приложения? Я ожидал, что смогу найти warфайл где-нибудь или что-то, но я думаю, что я смотрю в неправильном месте или пропускаю шаг.
+
+pomв основном это контейнер подмодулей, каждый подмодуль представлен подкаталогом в том же каталоге, что pom.xmlи pomупаковка.
+
+Где-то во вложенной в структуру проекта вы найдете артефакты (модули) с warупаковкой. Обычно Maven встраивает все в /targetподкаталоги каждого модуля. Поэтому после mvn installзагляните в targetподкаталог в модуле с warупаковкой.
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+##JFROG 
+Развертывайте и администрируйте контейнерные приложения с меньшими трудозатратами благодаря полностью управляемой службе Kubernetes. 
+Служба Azure Kubernetes (AKS) предоставляет бессерверную платформу Kubernetes со встроенными возможностями непрерывной интеграции и непрерывной поставки, 
+а также безопасностью и управлением корпоративного уровня. Обеспечьте совместную работу специалистов по разработке и эксплуатации на единой платформе, 
+позволяющей оперативно и уверенно создавать, доставлять и масштабировать приложения.
+
+Installation directory was set to /opt/jfrog/
+You can find more Artifactory information in the log directory /opt/jfrog/artifactory/var/log
+You can find more Xray information in the log directory /opt/jfrog/xray/var/log
+
+Once the application has started, it can be accessed at [http://192.168.11.178:8082]
+
+
+1. pick your installer
+Minimum System Requirements: 8 CPU, 16 GB Memory, 300 GB Fast Disk (3000+iops). External Ports: 8081, 8082.
+Requires Root access.
+
+
+Docker Compose
+
+
+RPM for CentOS (7, 8) / RHEL (7, 8)
+
+
+Debian for Debian (9, 10) / Ubuntu (16.04, 18.04)
+
+1. Download the installer
+
+a
+wget -O jfrog-deb-installer.tar.gz "https://releases.jfrog.io/artifactory/jfrog-prox/org/artifactory/pro/deb/jfrog-platform-trial-prox/[RELEASE]/jfrog-platform-trial-prox-[RELEASE]-deb.tar.gz"
+2. Extract it
+
+a
+tar -xvzf jfrog-deb-installer.tar.gz
+3. CD into directory
+
+a
+cd jfrog-platform-trial-pro*
+4. Run the installer
+
+a
+sudo ./install.sh
+5. Start Artifactory
+
+a
+sudo systemctl start artifactory.service
+6. Start Xray
+systemctl restart artifactory.service
+
+a
+sudo systemctl start xray.service
+Setting up for a production environment? See the full installation options.
+
+2. Access the JFrog Platform
+a
+http://<hostname>:8082
+For Example: http://localhost:8082 or http://192.168.11.178:8082
+JFrog Artifactory and JFrog Xray will take about a minute to start up.
+
+Log in using the credentials provided in the trial email and follow the onboarding wizard to apply the licenses found in the same email (or get a trial license)
+
+3. Get Started Fast
+QUICKSTART GUIDE.
+
+#default
+user: admin
+pass: password
+user:sera
+pasword: S#erakuz1970!
+
+curl -XPATCH -uaccess-admin:password http://192.168.11.191:8040/access/api/v1/users/access-admin -H "Content-Type: application/json" -d '{ "password": "S#erakuz1970!" }'
+
+curl -XPATCH -uaccess-admin:password http://192.168.11.191:8040/access/api/v1/users/access-admin -H "Content-Type: application/json" -d '{ "password": "S#erakuz1970!" }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+docker run serakuz888.azurecr.io/serakuz888:44
+
+Create a backup that can then be used with docker load.
+ docker save busybox > busybox.tar
+ ls -sh busybox.tar
+ docker save --output busybox.tar busybox
+ ls -sh busybox.tar
+ docker save -o fedora-all.tar fedora
+ docker save -o fedora-latest.tar fedora:latest
+Save an image to a tar.gz file using gzip🔗
+You can use gzip to save the image file and make the backup smaller.
+
+ docker save myimage:latest | gzip > myimage_latest.tar.gz
+Cherry-pick particular tags
+You can even cherry-pick particular tags of an image repository.
+
+ docker save -o ubuntu.tar ubuntu:lucid ubuntu:saucy
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+## Jenkins
+
+Disable Jenkins Security
+Log onto your Jenkins server using an account with root privileges. Once logged in, look open Jenkin’s configration XML file into a text editor.
+
+In the example below, we are opening the file in VIM.
+
+sudo vi /var/lib/jenkins/config.xml
+With the configuration file opened, perform a search for the useSecurity string. This can be done in VIM by pressing ESC and then entering /useSecurity.
+
+The line you are looking for should resemble the following.
+
+true
+Press i to enter VIM’s insert mode. Modify the value between the <useSecurity> tags and set the value to false.
+
+false
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#docker
+
+docker rm $(docker ps -q -f status=exited)
+
+docker rm $(docker ps -q -f status=exited)
+docker rmi serakuz888.azurecr.io/serakuz888:44
+docker run serakuz888.azurecr.io/serakuz888:44
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Это
+менеджер пакетов
+для Kubernetes
+
+Кто такой helm
+Helm — это установщик пакетов для Kubernetes. Примерно такой же, как npm для nodejs или apt-get 
+для цивилизованного мира. Говоря helm, мы на самом деле подразумеваем целых два приложения: 
+клиентский helm и его серверного, живущего в Kubernetes компаньона — tiller. 
+На пару они могут искать, устанавливать, апгрэйдить и удалять пакеты-приложения, 
+в хельмовской терминологии называемые чартами (chart).
+
+‘Chart’ — не единственный странный выбор слов. Например, чарт, установленный в Kubernetes, 
+уже называется релиз (release). 
+Если установить чарт-пакет два раза, то получится два релиза. И т.п.
+
+Но зато репозиторий для чартов так и называется — репозиторий. 
+Ну и конечно, есть как «дефолтный» репозиторий, так и собственные, локальные.
+
+Разобравшись с терминологией, теперь можно посмотреть на хельм поближе.
+
+def jobName = "MultiScan"  
+def job = Jenkins.instance.getItem(jobName)  
+job.getBuilds().each { it.delete() }  
+job.nextBuildNumber = 1   
+job.save()
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+## Work GitHub with Visual Studion Project
+
+1) Create project in visual studio
+2) Create new repository in your hit hub
+3) Open your Visual Studio and pick --> Clone Repository
+4) Insert git repository URL
+5) Insert Local path for your repositories
+6) Copy you visual studio project to --> Local path for your repositories
+7) After copyng files to Local path for your repositories change: 
+	right click button on unused project folders and pick options: Ignore these local item.
+	write comment to the first commit.
+8) Commit All --> Commit All and push
+9) For multiple users code:
+	create folders (multi) with project with you work.
+	After code changed frome one of the projects,
+	On the project not changed pick command: pull
+
+
+## Work with gitlab
+
+Note: Replace the username shown in the code with your GitHub username.
+
+git remote add origin https://github.com/NdagiStanley/new-repository.git
+git branch -M master
+git push -u origin master
+After running these commands, reload the browser page. Our index.html file is now listed in the online repository.
+
+You can make more updates to the repository by running these commands in order:
+
+git add .
+git commit -m "Commit message"
+## for fix problem
+git pull --rebase origin master
+git push origin master
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+def jobName = "GiLabBuildSLN"  
+def job = Jenkins.instance.getItem(jobName)  
+job.getBuilds().each { it.delete() }  
+job.nextBuildNumber = 1   
+job.save()
+
+
+
+/usr/bin/git
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+##jenkins
+-----------------------------------------------------------------------------------
+Connect agent to Jenkins one of these ways:
+
+Java Web Start is not available for the JVM version running Jenkins
+
+Run from agent command line:
+
+java -jar agent.jar -jnlpUrl http://192.168.11.196:8080/computer/win%2D10/jenkins-agent.jnlp -secret e7e94861a054ee9d048cbd8f26516d2cbfb79901c0f016133f233f0d298d5d5e -workDir "C:\jenkins"
+Run from agent command line, with the secret stored in a file:
+
+echo e7e94861a054ee9d048cbd8f26516d2cbfb79901c0f016133f233f0d298d5d5e > secret-file
+java -jar agent.jar -jnlpUrl http://192.168.11.196:8080/computer/win%2D10/jenkins-agent.jnlp -secret @secret-file -workDir "C:\jenkins"
+
+Jenkins Debian Packages
+This is the Debian package repository of Jenkins to automate installation and upgrade. To use this repository, first add the key to your system:
+
+## must be installed local git on jenkins machine and configured path to git
+
+apt-get install git
+
+apt install openjdk-11-jre-headless
+    
+  wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+  
+Then add a Jenkins apt repository entry:
+    
+  sudo sh -c 'echo deb https://pkg.jenkins.io/debian binary/ > /etc/apt/sources.list.d/jenkins.list'
+  
+Update your local package index, then finally install Jenkins:
+
+
+  sudo apt-get update
+  sudo apt-get install jenkins
+  
+The apt packages were signed using this key:
+
+pub   rsa4096 2020-03-30 [SC] [expires: 2023-03-30]
+      62A9756BFD780C377CF24BA8FCEF32E745F2C3D5
+uid                      Jenkins Project 
+sub   rsa4096 2020-03-30 [E] [expires: 2023-03-30]
+-----------------------------------------------------------------------------------------------------
+wget http://mirrors.jenkins-ci.org/debian/jenkins_2.232_all.deb
+
+apt-get install -fy
+
+java -jar agent.jar -jnlpUrl http://192.168.11.192:8080//home/ubuntu/Downloads/jenkins-agent.jnlp -secret 20522b449acc189194bc23ce6e129b9224f0edc638e8511c851c2bb198e2220e -workDir "c:\jenkins"
+
+for windows agent install wmi package
+
+for convert pipeline install package
+
+for gitlab install gitlab package
+
+## for home dirrectory
+
+The following set of commands would change the Jenkins Home location on Ubuntu Linux from the default to a new folder named /home/my_jenkins_home
+
+sudo -i
+sudo service jenkins stop
+mkdir /home/my_jenkins_home
+sudo chown jenkins:jenkins /home/my_jenkins_home
+sudo cp -prv /var/li/jenkins /home/my_jenkins_home
+sudo usermod -d /home/my_jenkins_home jenkins
+sudo nana /etc/default/jenkins
+After the Jenkins usermod command completes, open the /etc/default/jenkins file and update the JENKINS_HOME variable contained within.
+
+# jenkins home location
+JENKINS_HOME=/home/my_jenkins_home
+The next time you start Jenkins, the popular CI/CD tool will read from the new JENKINS_HOME location.
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+SPLUNK
+http://192.168.11.185:9000/
+user: serakuz
+user: admin
+pass: S#erakuz1970
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Gitlab access token
+
+BuilldVS 
+
+aeVtmeX6BoSPGUDwsBPH
+
+SonarQube
+
+New token "1de69573ce32e533d963f5412dd99d02db41a79f" has been created. Make sure you copy it now, you won't be able to see it again!
+
+
+Create or update the configuration file
+Create or update your .gitlab-ci.yml file with the following content.
+sonarqube-check:
+  image: mcr.microsoft.com/dotnet/core/sdk:latest
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script: 
+      - "apt-get update"
+      - "apt-get install --yes openjdk-11-jre"
+      - "dotnet tool install --global dotnet-sonarscanner"
+      - "export PATH=\"$PATH:$HOME/.dotnet/tools\""
+      - "dotnet sonarscanner begin /k:\"root_builldvs_AXyJaobeOcrBrlZfPM6E\" /d:sonar.login=\"$SONAR_TOKEN\" /d:\"sonar.host.url=$SONAR_HOST_URL\" "
+      - "dotnet build"
+      - "dotnet sonarscanner end /d:sonar.login=\"$SONAR_TOKEN\""
+  allow_failure: true
+  only:
+    - master # or the name of your main branch
+Note that this is a minimal base configuration to run a SonarQube analysis on your main branch.
+
+If you already have a pipeline configured and running, you might want to add the example from this step to your existing yml file.
+
+
+Add environment variables
+a. Define the SonarQube Token environment variable
+In GitLab, go to Settings > CI/CD > Variables to add the following variable and make sure it is available for your project:
+In the Key field, enter SONAR_TOKEN 
+In the Value field, enter an existing token, or a newly generated one: Generate a token
+Uncheck the "Protect Variable" checkbox
+Check the "Mask Variable" checkbox
+
+b. Define the SonarQube URL environment variable
+Still in Settings > CI/CD > Variables add a new variable and make sure it is available for your project:
+In the Key field, enter SONAR_HOST_URL 
+In the Value field, enter http://192.168.11.185:9000 
+Uncheck the "Protect Variable" checkbox
+Leave the "Mask variable" checkbox unchecked
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+SPLUNK
+http://127.0.0.1:8000/
+user: sera
+pass: S#erakuz1970
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+curl --header "PRIVATE-TOKEN: pQJ_YaePSFzzVyoc7J46" --request "DELETE" "http://192.168.11.189/api/v4/projects/2/pipelines/6"
+
+https://192.168.11.189/api/v4
+sAA5cuusje3ehf4fYJKp
+
+e7985a965b3332df7187164607ae5114a5957847
+
+gitlab-runner -debug run
+
+
+gitlab-runner register \
+  --non-interactive \
+  --url "http://192.168.11.189/" \
+  --registration-token "z5TgSbgfQ42bTnqy5yyi" \
+  --description "runner-test-1" \
+  --tag-list "docker,aws" \
+  --run-untagged="true" \
+  --locked="false" \
+  --access-level="not_protected"
+
+
+docker run --rm -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner register \
+  --non-interactive \
+  --executor "docker" \
+  --docker-image alpine:latest \
+  --url "http://192.168.11.189/" \
+  --registration-token "z5TgSbgfQ42bTnqy5yyi" \
+  --description "docker-runner" \
+  --tag-list "docker,aws" \
+  --run-untagged="true" \
+  --locked="false" \
+  --access-level="not_protected"
+
+
+docker run --rm -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner register \
+  --non-interactive \
+  --executor "docker" \
+  --docker-image alpine:latest \
+  --url "http://192.168.11.189/" \
+  --registration-token "kJaSsEwWSCzxYR4CZz1S" \
+  --description "docker-runner-1" \
+  --tag-list "docker,aws" \
+  --run-untagged="true" \
+  --locked="false" \
+  --access-level="not_protected"
+
+sudo gitlab-runner register \
+    --non-interactive \
+    --url "http://192.168.11.189" \
+    --registration-token "FhQvHzcMkq29o4U_yRqM" \
+    --description "codechecker" \
+    --executor "shell"
+
+ gitlab-runner register --name my-runner --url http://192.168.11.189 --registration-token rSKPbUqjx7f45EBeNZM
+
+curl -X POST  -F token=kJaSsEwWSCzxYR4CZz1S -F ref=REF_NAME http://192.168.11.189/api/v4/projects/3/trigger/pipeline
